@@ -16,11 +16,12 @@ network access, no server, and no database. Treat all data as personal financial
 | `src/expense_tracker/storage.py` | Load/save the JSON data file, ID allocation |
 | `src/expense_tracker/reports.py` | Pure aggregation functions (totals, month filter) |
 | `src/expense_tracker/formatters.py` | Output-format strategies (text / csv / json) |
+| `src/expense_tracker/validation.py` | Input validation for user-supplied values |
 | `src/expense_tracker/cli.py` | argparse wiring only; no business logic |
 | `tests/` | pytest suite; `tests/test_cli.py` holds end-to-end characterization tests |
 
-Data flow: `cli` → `storage` / `reports` → `formatters` → stdout.
-Business rules belong in `models` or `reports`, not in `cli`.
+Data flow: `cli` → `validation` → `storage` / `reports` → `formatters` → stdout.
+Business rules belong in `models`, `validation`, or `reports`, never in `cli`.
 
 ## 3. Setup
 ```bash

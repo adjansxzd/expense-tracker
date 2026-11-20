@@ -3,18 +3,22 @@
 import argparse
 import sys
 
-from . import reports, storage
+from . import reports, storage, validation
 from .formatters import FORMATTERS
-from .models import Expense, to_money
+from .models import Expense
 
 
 def cmd_add(args):
+    # Validate everything before touching the data file.
+    date = validation.parse_date(args.date)
+    category = validation.parse_category(args.category)
+    amount = validation.parse_amount(args.amount)
     expenses = storage.load_expenses(args.file)
     expense = Expense(
         id=storage.next_id(expenses),
-        date=args.date,
-        category=args.category,
-        amount=to_money(args.amount),
+        date=date,
+        category=category,
+        amount=amount,
         description=args.description or "",
     )
     expenses.append(expense)
@@ -25,14 +29,14 @@ def cmd_add(args):
 def cmd_list(args):
     expenses = storage.load_expenses(args.file)
     if args.month:
-        expenses = reports.filter_by_month(expenses, args.month)
+        expenses = reports.filter_by_month(expenses, validation.parse_month(args.month))
     sys.stdout.write(FORMATTERS[args.format].expenses(expenses))
 
 
 def cmd_report(args):
     expenses = storage.load_expenses(args.file)
     if args.month:
-        expenses = reports.filter_by_month(expenses, args.month)
+        expenses = reports.filter_by_month(expenses, validation.parse_month(args.month))
     formatter = FORMATTERS[args.format]
     sys.stdout.write(
         formatter.report(reports.total_by_category(expenses), reports.total(expenses))
@@ -77,7 +81,10 @@ def build_parser():
 def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
-    args.func(args)
+    try:
+        args.func(args)
+    except validation.ValidationError as exc:
+        parser.error(str(exc))  # prints usage + message to stderr, exits with code 2
 
 
 if __name__ == "__main__":
