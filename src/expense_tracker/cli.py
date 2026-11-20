@@ -5,7 +5,7 @@ import sys
 
 from . import reports, storage
 from .formatters import FORMATTERS
-from .models import Expense
+from .models import Expense, to_money
 
 
 def cmd_add(args):
@@ -14,7 +14,7 @@ def cmd_add(args):
         id=storage.next_id(expenses),
         date=args.date,
         category=args.category,
-        amount=float(args.amount),
+        amount=to_money(args.amount),
         description=args.description or "",
     )
     expenses.append(expense)

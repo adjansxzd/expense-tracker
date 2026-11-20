@@ -1,0 +1,17 @@
+# Red phase: new mitigation tests run against commit 939f6da (after-refactor, before fixes)
+$ python3 -m pytest -q -rf
+=========================== short test summary info ============================
+FAILED tests/test_money.py::test_report_prints_two_decimals - AssertionError:...
+FAILED tests/test_money.py::test_amount_roundtrips_without_drift - AssertionE...
+FAILED tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food--50-amount must be greater than 0]
+FAILED tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-0-amount must be greater than 0]
+FAILED tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-abc-amount must be a number]
+FAILED tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-nan-amount must be a number]
+FAILED tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-inf-amount must be a number]
+FAILED tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-1.234-at most 2 decimal places]
+FAILED tests/test_validation.py::test_add_rejects_invalid_input[2026-13-45-food-10-date must be a valid YYYY-MM-DD]
+FAILED tests/test_validation.py::test_add_rejects_invalid_input[03.11.2026-food-10-date must be a valid YYYY-MM-DD]
+FAILED tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-   -10-category must not be empty]
+FAILED tests/test_validation.py::test_month_filter_rejects_bad_month - Failed...
+FAILED tests/test_validation.py::test_valid_input_is_normalised - AssertionEr...
+13 failed, 12 passed in 0.13s

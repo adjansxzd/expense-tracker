@@ -12,7 +12,7 @@ network access, no server, and no database. Treat all data as personal financial
 ## 2. Architecture (src layout)
 | Path | Responsibility |
 |---|---|
-| `src/expense_tracker/models.py` | `Expense` dataclass, dict (de)serialisation |
+| `src/expense_tracker/models.py` | `Expense` dataclass, dict (de)serialisation, money (`Decimal`) |
 | `src/expense_tracker/storage.py` | Load/save the JSON data file, ID allocation |
 | `src/expense_tracker/reports.py` | Pure aggregation functions (totals, month filter) |
 | `src/expense_tracker/formatters.py` | Output-format strategies (text / csv / json) |
@@ -45,7 +45,7 @@ user's real `expenses.json` is never read or modified.
 
 ## 5. Coding conventions
 - Python 3.10+, type hints on all new or changed functions; `mypy src` must stay clean.
-- Do not introduce new `float` arithmetic for money; see risk register R1.
+- Money is `decimal.Decimal`, never `float`. Round only when formatting (2 decimal places).
 - Keep `cli.py` thin: parse arguments, call validation/domain code, pick a formatter.
 - New output formats are added by registering a formatter in `formatters.py`,
   not by adding `if/elif` branches in `cli.py`.
