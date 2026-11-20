@@ -1,0 +1,9 @@
+$ python3 evidence/concurrency_probe.py   # commit 6514b93
+trial 1: 20 processes, exit!=0: 8, records saved: 12 (expected 20), error types: ['json.decoder.JSONDecodeError']
+trial 2: 20 processes, exit!=0: 8, records saved: 11 (expected 20), error types: ['json.decoder.JSONDecodeError']
+trial 3: 20 processes, exit!=0: 6, records saved: 14 (expected 20), error types: ['json.decoder.JSONDecodeError']
+
+$ same probe against baseline source (git archive baseline src)
+trial 1: 20 processes, exit!=0: 5, records saved: 13 (expected 20), error types: ['json.decoder.JSONDecodeError']
+trial 2: 20 processes, exit!=0: 8, records saved: 12 (expected 20), error types: ['json.decoder.JSONDecodeError']
+trial 3: 20 processes, exit!=0: 6, records saved: 14 (expected 20), error types: ['json.decoder.JSONDecodeError']

@@ -1,0 +1,58 @@
+== F1 float money arithmetic ==
+$ expense-tracker add 2026-11-01 food 0.10
+Added expense #1
+[exit code: 0]
+$ expense-tracker add 2026-11-02 food 0.20
+Added expense #2
+[exit code: 0]
+$ expense-tracker report
+food         0.30
+TOTAL        0.30
+[exit code: 0]
+
+== F2 input validation ==
+$ expense-tracker add 2026-11-03 food -50
+usage: expense-tracker [-h] [--file FILE] {add,list,report,export} ...
+expense-tracker: error: amount must be greater than 0
+[exit code: 2]
+$ expense-tracker add 2026-13-45 food 10
+usage: expense-tracker [-h] [--file FILE] {add,list,report,export} ...
+expense-tracker: error: date must be a valid YYYY-MM-DD, got '2026-13-45'
+[exit code: 2]
+$ expense-tracker add 2026-11-04 food abc
+usage: expense-tracker [-h] [--file FILE] {add,list,report,export} ...
+expense-tracker: error: amount must be a number, got 'abc'
+[exit code: 2]
+$ expense-tracker add 2026-11-05  5
+usage: expense-tracker [-h] [--file FILE] {add,list,report,export} ...
+expense-tracker: error: category must not be empty
+[exit code: 2]
+$ expense-tracker list
+[exit code: 0]
+$ expense-tracker report --month 2026-11
+TOTAL        0.00
+[exit code: 0]
+
+== F3 CSV formula injection ==
+$ expense-tracker add 2026-11-06 misc 1 -d =HYPERLINK("http://example.invalid","click")
+Added expense #1
+[exit code: 0]
+$ expense-tracker export /tmp/tmp.KBocaBMwEx/out.csv
+Exported 1 expenses to /tmp/tmp.KBocaBMwEx/out.csv
+[exit code: 0]
+$ cat out.csv
+id,date,category,amount,description
+1,2026-11-06,misc,1.00,"=HYPERLINK(""http://example.invalid"",""click"")"
+
+== F4 corrupt data file ==
+$ expense-tracker list
+    obj, end = self.scan_once(s, idx)
+               ~~~~~~~~~~~~~~^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 2 column 1 (char 11)
+[exit code: 1]
+
+== F6 unknown output format ==
+$ expense-tracker report --format xml
+usage: expense-tracker report [-h] [--month MONTH] [--format {csv,json,text}]
+expense-tracker report: error: argument --format: invalid choice: 'xml' (choose from 'csv', 'json', 'text')
+[exit code: 2]

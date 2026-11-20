@@ -1,0 +1,79 @@
+# Final checks — 2026-11-20T14:44:23Z — commit 6514b93 (tag: final)
+
+$ python3 -m pytest -v
+============================= test session starts ==============================
+platform linux -- Python 3.13.18, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/claude/expense-tracker
+configfile: pyproject.toml
+testpaths: tests
+plugins: platformdirs-4.13.5, anyio-4.15.1
+collecting ... collected 27 items
+
+tests/test_cli.py::test_add_then_list PASSED                             [  3%]
+tests/test_cli.py::test_report_month_filter PASSED                       [  7%]
+tests/test_cli.py::test_report_formats_agree PASSED                      [ 11%]
+tests/test_cli.py::test_baseline_data_file_compatible PASSED             [ 14%]
+tests/test_cli.py::test_unknown_format_is_rejected PASSED                [ 18%]
+tests/test_cli.py::test_export_matches_csv_list PASSED                   [ 22%]
+tests/test_money.py::test_category_total_is_exact PASSED                 [ 25%]
+tests/test_money.py::test_report_prints_two_decimals PASSED              [ 29%]
+tests/test_money.py::test_amount_roundtrips_without_drift PASSED         [ 33%]
+tests/test_reports.py::test_total_by_category PASSED                     [ 37%]
+tests/test_reports.py::test_filter_by_month PASSED                       [ 40%]
+tests/test_storage.py::test_save_and_load_roundtrip PASSED               [ 44%]
+tests/test_storage.py::test_missing_file_returns_empty PASSED            [ 48%]
+tests/test_storage.py::test_next_id PASSED                               [ 51%]
+tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food--50-amount must be greater than 0] PASSED [ 55%]
+tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-0-amount must be greater than 0] PASSED [ 59%]
+tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-abc-amount must be a number] PASSED [ 62%]
+tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-nan-amount must be a number] PASSED [ 66%]
+tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-inf-amount must be a number] PASSED [ 70%]
+tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-1.234-at most 2 decimal places] PASSED [ 74%]
+tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-1e30-amount must be a number] PASSED [ 77%]
+tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-food-1000000000.01-must not exceed] PASSED [ 81%]
+tests/test_validation.py::test_add_rejects_invalid_input[2026-13-45-food-10-date must be a valid YYYY-MM-DD] PASSED [ 85%]
+tests/test_validation.py::test_add_rejects_invalid_input[03.11.2026-food-10-date must be a valid YYYY-MM-DD] PASSED [ 88%]
+tests/test_validation.py::test_add_rejects_invalid_input[2026-11-03-   -10-category must not be empty] PASSED [ 92%]
+tests/test_validation.py::test_month_filter_rejects_bad_month PASSED     [ 96%]
+tests/test_validation.py::test_valid_input_is_normalised PASSED          [100%]
+
+============================== 27 passed in 0.09s ==============================
+[exit code: 0]
+
+$ ruff check src tests
+All checks passed!
+[exit code: 0]
+
+$ mypy src
+Success: no issues found in 8 source files
+[exit code: 0]
+
+$ mypy --strict src | tail -1
+Found 18 errors in 3 files (checked 8 source files)
+
+$ python3 -m build --wheel --outdir /tmp/dist-final . | tail -1
+Successfully built expense_tracker-0.1.0-py3-none-any.whl
+
+# README smoke test in a fresh venv (pip install -e .)
+$ /tmp/venv-smoke/bin/expense-tracker --file /tmp/smoke.json add 2026-11-01 food 12.50 -d lunch
+Added expense #1
+[exit code: 0]
+$ /tmp/venv-smoke/bin/expense-tracker --file /tmp/smoke.json add 2026-11-02 food 0.10
+Added expense #2
+[exit code: 0]
+$ /tmp/venv-smoke/bin/expense-tracker --file /tmp/smoke.json add 2026-11-02 transport 0.20
+Added expense #3
+[exit code: 0]
+$ /tmp/venv-smoke/bin/expense-tracker --file /tmp/smoke.json report --month 2026-11
+food         12.60
+transport    0.20
+TOTAL        12.80
+[exit code: 0]
+$ /tmp/venv-smoke/bin/expense-tracker --file /tmp/smoke.json report --format json
+{
+  "food": "12.60",
+  "transport": "0.20",
+  "TOTAL": "12.80"
+}
+[exit code: 0]

@@ -1,0 +1,44 @@
+# Supplementary evidence for findings F5, F7-F10 — commit 6514b93
+
+## F7 concurrent writers: see evidence/concurrency_probe.log
+
+## F9 'delete command can reuse IDs' — search for delete/remove code
+$ grep -rniE "delete|remove|def cmd_" src
+src/expense_tracker/cli.py:11:def cmd_add(args):
+src/expense_tracker/cli.py:29:def cmd_list(args):
+src/expense_tracker/cli.py:36:def cmd_report(args):
+src/expense_tracker/cli.py:46:def cmd_export(args):
+
+## F10 '--file path traversal' — who controls --file?
+$ grep -n "\-\-file\|args.output" src/expense_tracker/cli.py
+48:    with open(args.output, "w", newline="", encoding="utf-8") as f:
+50:    print(f"Exported {len(expenses)} expenses to {args.output}")
+55:    parser.add_argument("--file", default=storage.DEFAULT_PATH, help="data file")
+
+## F8 dependency pinning at baseline vs final
+baseline requirements-dev.txt:
+pytest
+baseline README install line:
+    pip install -r requirements.txt
+final requirements-dev.txt:
+# Pinned dev tools (versions verified on 2026-11-20). Change only after human review.
+pytest==9.1.1
+ruff==0.16.9
+mypy==2.3.1
+build==1.6.1
+
+## F5 agent-ops files at baseline
+$ git ls-tree -r --name-only baseline
+.gitignore
+README.md
+pyproject.toml
+requirements-dev.txt
+src/expense_tracker/__init__.py
+src/expense_tracker/__main__.py
+src/expense_tracker/cli.py
+src/expense_tracker/models.py
+src/expense_tracker/reports.py
+src/expense_tracker/storage.py
+tests/conftest.py
+tests/test_reports.py
+tests/test_storage.py
