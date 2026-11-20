@@ -62,3 +62,19 @@ def test_baseline_data_file_compatible(tmp_path, capsys):
     listed = json.loads(run(capsys, "--file", f, "list", "--format", "json"))
     assert [e["id"] for e in listed] == [1, 2, 3]
     assert [e["description"] for e in listed] == ["old", "lunch", ""]
+
+
+def test_unknown_format_is_rejected(tmp_path, capsys):
+    import pytest
+
+    with pytest.raises(SystemExit) as exc:
+        main(["--file", str(tmp_path / "d.json"), "report", "--format", "xml"])
+    assert exc.value.code == 2
+    assert "invalid choice" in capsys.readouterr().err
+
+
+def test_export_matches_csv_list(tmp_path, capsys):
+    f = write_baseline(tmp_path)
+    out = tmp_path / "out.csv"
+    run(capsys, "--file", f, "export", str(out))
+    assert out.read_bytes().decode("utf-8") == run(capsys, "--file", f, "list", "--format", "csv")

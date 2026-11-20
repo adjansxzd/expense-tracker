@@ -15,10 +15,11 @@ network access, no server, and no database. Treat all data as personal financial
 | `src/expense_tracker/models.py` | `Expense` dataclass, dict (de)serialisation |
 | `src/expense_tracker/storage.py` | Load/save the JSON data file, ID allocation |
 | `src/expense_tracker/reports.py` | Pure aggregation functions (totals, month filter) |
-| `src/expense_tracker/cli.py` | argparse wiring and output formatting (target: wiring only) |
+| `src/expense_tracker/formatters.py` | Output-format strategies (text / csv / json) |
+| `src/expense_tracker/cli.py` | argparse wiring only; no business logic |
 | `tests/` | pytest suite; `tests/test_cli.py` holds end-to-end characterization tests |
 
-Data flow: `cli` → `storage` / `reports` → stdout.
+Data flow: `cli` → `storage` / `reports` → `formatters` → stdout.
 Business rules belong in `models` or `reports`, not in `cli`.
 
 ## 3. Setup
@@ -46,7 +47,8 @@ user's real `expenses.json` is never read or modified.
 - Python 3.10+, type hints on all new or changed functions; `mypy src` must stay clean.
 - Do not introduce new `float` arithmetic for money; see risk register R1.
 - Keep `cli.py` thin: parse arguments, call validation/domain code, pick a formatter.
-- Do not add new `if/elif` format branches to `cli.py`; see pattern decision (Task 3).
+- New output formats are added by registering a formatter in `formatters.py`,
+  not by adding `if/elif` branches in `cli.py`.
 - Errors shown to the user go to stderr with exit code 2; no raw tracebacks for bad input.
 - Style is enforced by `ruff` (config in `pyproject.toml`); do not reformat unrelated code.
 

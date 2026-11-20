@@ -1,11 +1,10 @@
 """Command-line interface for the expense tracker."""
 
 import argparse
-import csv
-import json
 import sys
 
 from . import reports, storage
+from .formatters import FORMATTERS
 from .models import Expense
 
 
@@ -27,50 +26,23 @@ def cmd_list(args):
     expenses = storage.load_expenses(args.file)
     if args.month:
         expenses = reports.filter_by_month(expenses, args.month)
-    if args.format == "text":
-        for e in expenses:
-            print(f"{e.id:>3}  {e.date}  {e.category:<12} {e.amount:>10}  {e.description}")
-    elif args.format == "csv":
-        writer = csv.writer(sys.stdout)
-        writer.writerow(["id", "date", "category", "amount", "description"])
-        for e in expenses:
-            writer.writerow([e.id, e.date, e.category, e.amount, e.description])
-    elif args.format == "json":
-        print(json.dumps([e.to_dict() for e in expenses], indent=2))
-    else:
-        print("Unknown format")
+    sys.stdout.write(FORMATTERS[args.format].expenses(expenses))
 
 
 def cmd_report(args):
     expenses = storage.load_expenses(args.file)
     if args.month:
         expenses = reports.filter_by_month(expenses, args.month)
-    totals = reports.total_by_category(expenses)
-    if args.format == "text":
-        for category, amount in sorted(totals.items()):
-            print(f"{category:<12} {amount}")
-        print(f"{'TOTAL':<12} {reports.total(expenses)}")
-    elif args.format == "csv":
-        writer = csv.writer(sys.stdout)
-        writer.writerow(["category", "total"])
-        for category, amount in sorted(totals.items()):
-            writer.writerow([category, amount])
-        writer.writerow(["TOTAL", reports.total(expenses)])
-    elif args.format == "json":
-        data = dict(totals)
-        data["TOTAL"] = reports.total(expenses)
-        print(json.dumps(data, indent=2))
-    else:
-        print("Unknown format")
+    formatter = FORMATTERS[args.format]
+    sys.stdout.write(
+        formatter.report(reports.total_by_category(expenses), reports.total(expenses))
+    )
 
 
 def cmd_export(args):
     expenses = storage.load_expenses(args.file)
     with open(args.output, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["id", "date", "category", "amount", "description"])
-        for e in expenses:
-            writer.writerow([e.id, e.date, e.category, e.amount, e.description])
+        f.write(FORMATTERS["csv"].expenses(expenses))
     print(f"Exported {len(expenses)} expenses to {args.output}")
 
 
@@ -88,12 +60,12 @@ def build_parser():
 
     p_list = sub.add_parser("list", help="list expenses")
     p_list.add_argument("--month")
-    p_list.add_argument("--format", default="text")
+    p_list.add_argument("--format", default="text", choices=sorted(FORMATTERS))
     p_list.set_defaults(func=cmd_list)
 
     p_report = sub.add_parser("report", help="totals by category")
     p_report.add_argument("--month")
-    p_report.add_argument("--format", default="text")
+    p_report.add_argument("--format", default="text", choices=sorted(FORMATTERS))
     p_report.set_defaults(func=cmd_report)
 
     p_export = sub.add_parser("export", help="export all expenses to CSV")
