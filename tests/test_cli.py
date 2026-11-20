@@ -42,10 +42,8 @@ def test_report_month_filter(tmp_path, capsys):
 def test_report_formats_agree(tmp_path, capsys):
     f = write_baseline(tmp_path)
     as_json = json.loads(run(capsys, "--file", f, "report", "--format", "json"))
-    as_csv = {
-        row[0]: row[1]
-        for row in list(csv.reader(io.StringIO(run(capsys, "--file", f, "report", "--format", "csv"))))[1:]
-    }
+    csv_out = run(capsys, "--file", f, "report", "--format", "csv")
+    as_csv = {row[0]: row[1] for row in list(csv.reader(io.StringIO(csv_out)))[1:]}
     as_text = dict(
         line.rsplit(None, 1) for line in run(capsys, "--file", f, "report").strip().splitlines()
     )

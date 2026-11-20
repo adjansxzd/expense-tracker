@@ -11,7 +11,7 @@ DEFAULT_PATH = "expenses.json"
 def load_expenses(path=DEFAULT_PATH):
     if not os.path.exists(path):
         return []
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         raw = json.load(f)
     return [Expense.from_dict(item) for item in raw]
 
