@@ -1,5 +1,5 @@
-from expense_tracker.models import Expense
 from expense_tracker import storage
+from expense_tracker.models import Expense
 
 
 def test_save_and_load_roundtrip(tmp_path):

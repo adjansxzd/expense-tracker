@@ -1,0 +1,60 @@
+== F1 float money arithmetic ==
+$ expense-tracker add 2026-11-01 food 0.10
+Added expense #1
+[exit code: 0]
+$ expense-tracker add 2026-11-02 food 0.20
+Added expense #2
+[exit code: 0]
+$ expense-tracker report
+food         0.30000000000000004
+TOTAL        0.30000000000000004
+[exit code: 0]
+
+== F2 input validation ==
+$ expense-tracker add 2026-11-03 food -50
+Added expense #1
+[exit code: 0]
+$ expense-tracker add 2026-13-45 food 10
+Added expense #2
+[exit code: 0]
+$ expense-tracker add 2026-11-04 food abc
+    amount=float(args.amount),
+           ~~~~~^^^^^^^^^^^^^
+ValueError: could not convert string to float: 'abc'
+[exit code: 1]
+$ expense-tracker add 2026-11-05  5
+Added expense #3
+[exit code: 0]
+$ expense-tracker list
+  1  2026-11-03  food              -50.0  
+  2  2026-13-45  food               10.0  
+  3  2026-11-05                      5.0  
+[exit code: 0]
+$ expense-tracker report --month 2026-11
+             5.0
+food         -50.0
+TOTAL        -45.0
+[exit code: 0]
+
+== F3 CSV formula injection ==
+$ expense-tracker add 2026-11-06 misc 1 -d =HYPERLINK("http://example.invalid","click")
+Added expense #1
+[exit code: 0]
+$ expense-tracker export /tmp/tmp.P79pfk0Qqi/out.csv
+Exported 1 expenses to /tmp/tmp.P79pfk0Qqi/out.csv
+[exit code: 0]
+$ cat out.csv
+id,date,category,amount,description
+1,2026-11-06,misc,1.0,"=HYPERLINK(""http://example.invalid"",""click"")"
+
+== F4 corrupt data file ==
+$ expense-tracker list
+    obj, end = self.scan_once(s, idx)
+               ~~~~~~~~~~~~~~^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 2 column 1 (char 11)
+[exit code: 1]
+
+== F6 unknown output format ==
+$ expense-tracker report --format xml
+Unknown format
+[exit code: 0]

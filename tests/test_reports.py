@@ -1,5 +1,5 @@
-from expense_tracker.models import Expense
 from expense_tracker import reports
+from expense_tracker.models import Expense
 
 ITEMS = [
     Expense(1, "2026-10-30", "food", 10),
